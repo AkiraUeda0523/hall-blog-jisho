@@ -61,3 +61,19 @@ h1 .kicker{font-size:12px;color:var(--mute);letter-spacing:.18em}
 h1 .ttl b{font-size:24px;font-weight:700;letter-spacing:.08em;line-height:1.2}
 h1 .ttl em{align-self:flex-start;margin:2px 0 0;font-size:9px;letter-spacing:.12em;padding:1px 6px}
 @media(max-width:560px){.bar{padding:14px 14px 10px}h1{gap:12px}h1 .area{font-size:42px}h1 .ttl{padding-left:12px}h1 .ttl b{font-size:19px}h1 .kicker{font-size:10px;letter-spacing:.12em}}
+/* ホールにカーソル→地図が寄る(hallmap.js) */
+#hallmap{position:fixed;inset:0;z-index:0;opacity:0;transition:opacity .7s;pointer-events:none}
+#hallmap.on{opacity:1}
+#mapcredit{position:fixed;right:8px;bottom:6px;z-index:2;font-size:10px;color:var(--mute);background:rgba(11,13,18,.7);padding:1px 6px;border-radius:4px}
+#mapcredit a{color:var(--mute)}
+.hm-pin{width:18px;height:18px;border-radius:50%;background:#7cf0c8;border:3px solid #fff;box-shadow:0 0 0 6px rgba(124,240,200,.3),0 0 22px #7cf0c8}
+.hm-pin[data-today="1"]{background:#ff5a36;box-shadow:0 0 0 6px rgba(255,90,54,.35),0 0 24px #ff5a36}
+/* 現在地からの所要時間 */
+.route{display:none;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px}
+.hall:hover .route,.hall.hm .route,.route.done{display:flex}
+@media(hover:none){.route{display:flex}}
+.route-btn{appearance:none;border:1px solid var(--acc);background:rgba(124,240,200,.1);color:var(--acc);border-radius:99px;padding:3px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.route-btn:hover{background:rgba(124,240,200,.22)}
+.route-out{color:var(--fg)}
+.route-go{color:var(--mute);border:1px solid var(--line);border-radius:6px;padding:1px 8px;text-decoration:none}.route-go:hover{color:var(--acc);border-color:var(--acc)}
+@media(max-width:899px){#hallmap.on{opacity:.55}}

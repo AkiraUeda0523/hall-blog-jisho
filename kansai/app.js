@@ -126,7 +126,38 @@
     enter.append("circle").attr("class", "dot").attr("r", 0).transition().duration(700).attr("r", (d) => (s.type === "city" ? 7 : 3.5) * (d.st === "today" ? 1.7 : 1));
     enter.append("title").text((d) => d.name);
     gPins.selectAll("g.pin").attr("data-st", (d) => d.st).attr("transform", (d) => `translate(${d.xy}) scale(${1 / k})`)
-      .on("click", (_, d) => document.getElementById("h-" + d.id)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      .on("click", (_, d) => document.getElementById("h-" + d.id)?.scrollIntoView({ behavior: "smooth", block: "center" }))
+      .on("mouseenter", (_, d) => hallZoom(d)).on("mouseleave", () => window.HallMap && window.HallMap.hide());
+  }
+
+  // ---------- 現在地からの所要時間(目安) ----------
+  // 位置情報はボタンを押した時だけブラウザに許可を求め、端末内で距離を計算するだけ(どこにも送らない)
+  let here = null;
+  const locate = () => new Promise((ok, ng) => here ? ok(here) : !navigator.geolocation ? ng(new Error("nogeo")) :
+    navigator.geolocation.getCurrentPosition((p) => ok((here = { lat: p.coords.latitude, lon: p.coords.longitude })), ng, { timeout: 10000, maximumAge: 300000 }));
+  const distKm = (a, b) => { const r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r;
+    const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dn / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+  const fmtMin = (m) => (m < 60 ? `${Math.max(1, Math.round(m))}分` : `${Math.floor(m / 60)}時間${Math.round(m % 60)}分`);
+  const gmaps = (h, mode) => `https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}&travelmode=${mode}`;
+  function routeRow(h) {
+    if (!h.lat || !h.lon) return "";
+    const out = el("span", { class: "route-out" });
+    const row = el("div", { class: "route" });
+    const showEst = (pos) => {
+      const d = distKm(pos, h);
+      row.classList.add("done");
+      out.textContent = d > 80 ? `直線 約${Math.round(d)}km(遠いのでGoogleマップで確認)` : `直線 ${d.toFixed(1)}km ／ 🚶徒歩 約${fmtMin((d * 1.25) / 0.08)} ／ 🚗車 約${fmtMin((d * 1.4) / 0.5 + 3)}(目安)`;
+    };
+    const btn = el("button", { class: "route-btn", type: "button", onclick: () => {
+      out.textContent = "現在地を取得中…";
+      locate().then(showEst, () => { out.textContent = "現在地を取得できませんでした(ブラウザの位置情報を許可してください)"; });
+    } }, "📍 今から行くと?");
+    row.append(btn, out,
+      el("a", { class: "route-go", href: gmaps(h, "transit"), target: "_blank", rel: "noopener" }, "電車"),
+      el("a", { class: "route-go", href: gmaps(h, "driving"), target: "_blank", rel: "noopener" }, "車"),
+      el("a", { class: "route-go", href: gmaps(h, "walking"), target: "_blank", rel: "noopener" }, "徒歩"));
+    if (here) showEst(here);
+    return row;
   }
 
   // ---------- リスト描画 ----------
@@ -149,13 +180,15 @@
       meta.push(el("span", { class: "badge none" }, h.blog?.url ? `専用ブログなし(${KIND_LABEL[h.blog.kind] || "他"}あり)` : h.checked ? "ブログなし" : "未調査"));
     }
     const tod = isToday(h);
-    return el("article", { class: "hall " + st + (pinStatus(h) === "stale" ? " stale" : "") + (tod ? " today" : ""), id: "h-" + h.id, "data-st": st },
+    return el("article", { class: "hall " + st + (pinStatus(h) === "stale" ? " stale" : "") + (tod ? " today" : ""), id: "h-" + h.id, "data-st": st, onmouseenter: () => hallZoom(h), onmouseleave: () => window.HallMap && window.HallMap.hide() },
       tod ? el("div", { class: "today-ribbon" }, "🔥 本日更新", timeOf(h) ? el("small", {}, timeOf(h)) : "") : "",
       el("h4", {}, h.name),
       h.address ? el("p", { class: "addr" }, h.address) : "",
       el("div", { class: "metas" }, meta),
-      links.length ? el("div", { class: "links" }, links) : "");
+      links.length ? el("div", { class: "links" }, links) : "",
+      routeRow(h));
   }
+  const hallZoom = (h) => window.HallMap && window.HallMap.show({ lat: h.lat, lon: h.lon, __today: isToday(h) });
 
   function render() {
     const root = $("#content");

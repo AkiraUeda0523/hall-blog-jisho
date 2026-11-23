@@ -2,11 +2,14 @@
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>関西｜パチンコ・パチスロ店舗 ホールブログ辞典</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="style.css"><!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "55148a3e479a43e4b2d31fa7539d7345"}'></script><!-- End Cloudflare Web Analytics -->
 
 </head>
 <body>
 <svg id="bgmap" aria-hidden="true"></svg>
+<div id="hallmap" aria-hidden="true"></div>
+<div id="mapcredit">地図 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ・ <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a></div>
 <div id="top">
   <div class="bar"><h1><span class="area">関西</span><span class="ttl"><span class="kicker">パチンコ・パチスロ 店舗</span><b>ホールブログ辞典</b><em>PROTOTYPE</em></span></h1>
     <nav class="switch"><a href="../kanto/">関東</a><a href="../kansai/" class="on">関西</a></nav></div>
@@ -17,5 +20,7 @@
 <script src="d3.min.js"></script>
 <script src="data/kansai_embedded.js"></script>
 <script>window.REGION={"key": "kansai", "title": "関西", "prefs": [{"code": "25", "name": "滋賀県"}, {"code": "26", "name": "京都府"}, {"code": "27", "name": "大阪府"}, {"code": "28", "name": "兵庫県"}, {"code": "29", "name": "奈良県"}, {"code": "30", "name": "和歌山県"}]};</script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="hallmap.js"></script>
 <script src="app.js"></script>
 </body></html>
