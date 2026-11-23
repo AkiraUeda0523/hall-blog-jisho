@@ -188,7 +188,12 @@
       links.length ? el("div", { class: "links" }, links) : "",
       routeRow(h));
   }
-  const hallZoom = (h) => window.HallMap && window.HallMap.show({ lat: h.lat, lon: h.lon, __today: isToday(h) });
+  const hallZoom = (h) => {
+    if (!window.HallMap) return;
+    window.HallMap.show({ lat: h.lat, lon: h.lon, __today: isToday(h) });
+    // スマホ: 下の地図の枠にカードが隠れないよう、タップしたカードを上寄せにする
+    if (window.matchMedia("(hover: none)").matches) document.getElementById("h-" + h.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   function render() {
     const root = $("#content");

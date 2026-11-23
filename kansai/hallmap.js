@@ -4,8 +4,17 @@
 (() => {
   const DWELL = 300;   // 止まってから寄るまで(ms)
   const LEAVE = 900;   // カーソルが外れてから地図を消すまで(ms)
-  let map = null, marker = null, markerEl = null, tShow = 0, tHide = 0, failed = false;
+  let quietUntil = 0, map = null, marker = null, markerEl = null, tShow = 0, tHide = 0, failed = false;
   const box = () => document.getElementById("hallmap");
+  const sheet = () => window.innerWidth < 900;                        // 狭い画面: 下から出る地図の枠(ボトムシート)
+  const canHover = window.matchMedia("(hover: hover)").matches;
+  const setOn = (on) => { const b = box(); if (!b) return; b.classList.toggle("on", on); document.body.classList.toggle("hm-on", on && sheet()); };
+  let closeBtn = null;
+  function ensureClose() {
+    if (closeBtn) return;
+    closeBtn = document.createElement("button"); closeBtn.id = "hallmap-close"; closeBtn.type = "button"; closeBtn.textContent = "✕ 地図を閉じる";
+    closeBtn.addEventListener("click", () => { quietUntil = Date.now() + 900; clearTimeout(tShow); setOn(false); }); document.body.append(closeBtn);
+  }
 
   const STYLE = {
     version: 8,
@@ -49,24 +58,24 @@
 
   function fly(h) {
     init(); if (!map) return;
-    const wide = window.innerWidth >= 900;
-    // 画面の左は一覧なので、店が右側(または上側)の見える部分の中央に来るようにずらす
-    const padding = wide ? { left: Math.min(560, window.innerWidth * 0.38) + 24, top: 0, right: 0, bottom: 0 } : { top: 0, left: 0, right: 0, bottom: window.innerHeight * 0.45 };
-    setMarker(h);
-    box().classList.add("on");
+    // 広い画面: 左は一覧なので、店が右側の見える部分の中央に来るようにずらす。狭い画面: 地図は下の枠なのでそのまま中央
+    const padding = sheet() ? { top: 0, left: 0, right: 0, bottom: 0 } : { left: Math.min(560, window.innerWidth * 0.38) + 24, top: 0, right: 0, bottom: 0 };
+    setMarker(h); ensureClose();
+    setOn(true);
     map.resize();
     map.flyTo({ center: [h.lon, h.lat], zoom: 17.3, pitch: 62, bearing: -25, padding, duration: 2200, essential: true });
   }
 
   window.HallMap = {
     show(h) {
-      if (!h || !h.lat || !h.lon) return;
+      if (!h || !h.lat || !h.lon || Date.now() < quietUntil) return;
       clearTimeout(tHide); clearTimeout(tShow);
       tShow = setTimeout(() => fly(h), DWELL);
     },
     hide() {
       clearTimeout(tShow); clearTimeout(tHide);
-      tHide = setTimeout(() => { const b = box(); if (b) b.classList.remove("on"); }, LEAVE);
+      if (sheet() && !canHover) return;                                  // スマホは「✕」で閉じる(指を離しても消さない)
+      tHide = setTimeout(() => setOn(false), LEAVE);
     }
   };
 })();

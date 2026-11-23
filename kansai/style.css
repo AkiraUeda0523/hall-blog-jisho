@@ -76,4 +76,15 @@ h1 .ttl em{align-self:flex-start;margin:2px 0 0;font-size:9px;letter-spacing:.12
 .route-btn:hover{background:rgba(124,240,200,.22)}
 .route-out{color:var(--fg)}
 .route-go{color:var(--mute);border:1px solid var(--line);border-radius:6px;padding:1px 8px;text-decoration:none}.route-go:hover{color:var(--acc);border-color:var(--acc)}
-@media(max-width:899px){#hallmap.on{opacity:.55}}
+/* 狭い画面: 下から出る地図の枠 */
+#hallmap-close{display:none}
+@media(max-width:899px){
+ #hallmap{inset:auto 0 0 0;height:40vh;z-index:6;border-top:1px solid rgba(124,240,200,.5);border-radius:16px 16px 0 0;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,.6)}
+ #hallmap-close{position:fixed;right:10px;bottom:calc(40vh - 38px);z-index:7;appearance:none;border:1px solid var(--line);background:rgba(11,13,18,.85);color:var(--fg);border-radius:99px;padding:4px 12px;font:inherit;font-size:12px;opacity:0;pointer-events:none;transition:opacity .4s}
+ body.hm-on #hallmap-close{display:block;opacity:1;pointer-events:auto}
+ body.hm-on main{padding-bottom:46vh}
+ #mapcredit{opacity:0;z-index:7;transition:opacity .4s}body.hm-on #mapcredit{opacity:1}
+ .filters{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none;gap:14px}.filters::-webkit-scrollbar{display:none}
+ .filters label{flex:none}
+}
+@media(max-width:899px){.hall{scroll-margin-top:200px}}
